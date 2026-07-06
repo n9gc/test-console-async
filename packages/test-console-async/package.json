@@ -1,0 +1,58 @@
+{
+	"$schema": "https://json.schemastore.org/package",
+	"name": "test-console-async",
+	"version": "1.0.0",
+	"license": "MIT",
+	"author": "e0selmy4v",
+	"description": "Another version of test-console using AsyncLocalStorage to prevent race condition",
+	"keywords": [
+		"test-console",
+		"async-local-storage",
+		"intercept",
+		"log",
+		"logs",
+		"console",
+		"stdout",
+		"stderr",
+		"test",
+		"spy",
+		"mock",
+		"test double"
+	],
+	"type": "module",
+	"exports": {
+		".": "./lib/index"
+	},
+	"bugs": {
+		"url": "https://github.com/n9gc/test-console-async/issues"
+	},
+	"homepage": "https://github.com/n9gc/test-console-async#readme",
+	"repository": {
+		"url": "git+https://github.com/n9gc/test-console-async",
+		"type": "git"
+	},
+	"scripts": {
+		"test:tape": "tsx test.ts | colortape",
+
+		"build:tsc": "tsc --outDir .",
+
+		"clear:tsc": "rimraf -g -- **/*.{d.ts,js} tsconfig.tsbuildinfo",
+
+		"prepublishOnly": "pnpm run /^build:.*/",
+		"postpublish": "pnpm run /^clear:.*/"
+	},
+	"files": [
+		"*",
+		"!tsconfig.json",
+		"!**/*.ts",
+		"**/*.d.ts",
+		"!*.swp",
+		"!pnpm-lock.yaml"
+	],
+	"devDependencies": {
+		"@types/node": "latest",
+		"@types/tape": "latest",
+		"tape": "latest",
+		"colortape": "latest"
+	}
+}
