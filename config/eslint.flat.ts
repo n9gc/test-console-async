@@ -1,11 +1,10 @@
-import { includeIgnoreFile } from '@eslint/compat';
 import eslint from '@eslint/js';
 import accurtypeStyle from 'eslint-config-accurtype-style';
 import { importX } from 'eslint-plugin-import-x';
 import importZod from 'eslint-plugin-import-zod';
 import { configs as securityConfigs } from 'eslint-plugin-security';
 import unicorn from 'eslint-plugin-unicorn';
-import { defineConfig } from 'eslint/config';
+import { defineConfig, includeIgnoreFile } from 'eslint/config';
 import globals from 'globals';
 import { ConfigArray, configs as tseslintConfigs } from 'typescript-eslint';
 import { pathTo } from './utility.ts';
@@ -30,7 +29,12 @@ const config: ConfigArray = defineConfig(
 	},
 	{
 		name: 'Opt Rules',
-		rules: { 'no-unused-vars': 'off' },
+		rules: {
+			'no-unused-vars': 'off',
+			'security/detect-object-injection': 'off',
+			'unicorn/no-array-reduce': 'off',
+			'unicorn/no-computed-property-existence-check': 'off',
+		},
 	},
 	includeIgnoreFile(pathTo('../.gitignore')),
 	{

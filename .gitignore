@@ -8,3 +8,4 @@ dist
 target
 Cargo.lock
 /tsconfig.json
+.vim
