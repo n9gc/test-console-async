@@ -1,0 +1,65 @@
+name: GitHub Pages
+
+on:
+    push:
+        branches: ['master']
+    pull_request:
+        branches: ['master']
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        # env:
+        #     PLANT_UML_VERSION: '1.2024.7'
+        #     UML_GRAPH_LIST: 'docs/arch.puml'
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  submodules: recursive
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: latest
+
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24.x
+
+            - name: Init enviroument
+              run: |
+                  pnpm i
+
+            - name: Build
+              run: |
+                  pnpm build
+
+            # - name: Gen PlantUML
+            #   run: |
+            #       sudo apt install graphviz
+            #       wget https://github.com/plantuml/plantuml/releases/download/v${{ env.PLANT_UML_VERSION }}/plantuml-${{ env.PLANT_UML_VERSION }}.jar -O plantuml.jar
+            #       IFS=',' read -r -a array <<< "${{ env.UML_GRAPH_LIST }}"
+            #       for item in "${array[@]}"; do
+            #         java -jar plantuml.jar -tsvg $item
+            #       done
+            #       rm -rf plantuml.jar
+
+            - name: Prepare push
+              run: |
+                  find . -name '.gitignore' -type f -print | xargs rm -rf
+                  rm -rf .husky
+
+            - name: Push Branch
+              if: github.event_name == 'push'
+              uses: actions-js/push@master
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: gh-pages
+                  amend: true
+                  force: true
