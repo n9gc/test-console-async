@@ -29,7 +29,7 @@ function hijack() {
 				.find(n => n !== void 0)
 				?? isTTYOriginal,
 		});
-		const writeOriginal = process[name].write;
+		const writeOriginal = process[name].write.bind(process[name]);
 		process[name].write = (
 			data: string | Uint8Array,
 			encoding?: ((error?: Error | null) => void) | BufferEncoding,
