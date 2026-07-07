@@ -29,6 +29,6 @@ export function getOptions(): readonly InspectOption[] {
  * @returns the result of the function
  */
 export function addOptions<T>(options: readonly InspectOption[], callback: () => T) {
-	return optionStorage.run([...getOptions(), ...options], callback);
+	return optionStorage.run([...options, ...getOptions()], callback);
 }
 

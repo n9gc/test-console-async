@@ -44,6 +44,9 @@
 		"eslint": "^10.0.0",
 		"prettier": "latest",
 
+		"tape": "latest",
+		"colortape": "latest",
+
 		"rimraf": "latest",
 		"make-dir-cli": "latest",
 		"tsx": "latest",
