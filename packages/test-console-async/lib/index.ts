@@ -8,7 +8,7 @@ declare module './index.ts';
 
 export * from './types.ts';
 
-import { addOptions, getOptions } from './storage.ts';
+import { addOptions, enterIsTTY, getOptions } from './storage.ts';
 import type { InspectOption } from './types.ts';
 
 /**
@@ -30,6 +30,7 @@ function hijack() {
 				.find(n => name in n)
 				?? { [name]: isTTYOriginal }
 			)[name],
+			set: (isTTY: boolean) => enterIsTTY(isTTY, name),
 		});
 		const writeOriginal = process[name].write.bind(process[name]);
 		process[name].write = (

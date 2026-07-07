@@ -1,6 +1,5 @@
 import { test } from 'tape';
 import { inspect } from './index.ts';
-import { getOptions } from './storage.ts';
 
 const isTTY = [
 	process.stdout.isTTY,
@@ -87,8 +86,9 @@ test('isTTY changed', t => {
 });
 
 test('isTTY shadow', t => {
-	t.plan(4);
+	t.plan(8);
 
+	t.same(isTTY[0], stream[0].isTTY, 'clean');
 	inspect(() => {
 		t.notSame(isTTY[0], stream[0].isTTY, 'changed');
 		inspect(() => {
@@ -97,7 +97,26 @@ test('isTTY shadow', t => {
 				t.same(isTTY[0], stream[0].isTTY, 'changed');
 				t.notSame(isTTY[0], stream[1].isTTY, 'shadowed');
 			}, { isTTY: { stdout: isTTY[0] } });
+			t.notSame(isTTY[0], stream[0].isTTY, 'clean');
 		});
+		t.notSame(isTTY[0], stream[0].isTTY, 'clean');
 	}, { isTTY: !isTTY[0] });
+	t.same(isTTY[0], stream[0].isTTY, 'clean');
+});
+
+test('assign isTTY', async t => {
+	t.plan(4);
+
+	await new Promise<void>(resolve => setTimeout(() => {
+		stream[0].isTTY = false;
+		t.same(stream[0].isTTY, false, 'isTTY false');
+		stream[0].isTTY = true;
+		t.same(stream[0].isTTY, true, 'isTTY true');
+		stream[0].isTTY = !isTTY[0];
+		t.same(stream[0].isTTY, !isTTY[0], 'isTTY neg');
+		resolve();
+	}, 50));
+
+	t.same(stream[0].isTTY, isTTY[0], 'isTTY');
 });
 

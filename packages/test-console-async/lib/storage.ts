@@ -32,3 +32,13 @@ export function addOptions<T>(options: readonly InspectOption[], callback: () =>
 	return optionStorage.run([...options, ...getOptions()], callback);
 }
 
+/**
+ * Simulate assigning values to `isTTY`
+ * Only effective in the current asynchronous context
+ * @param isTTY now value of `isTTY`
+ * @param name what stream you need to assign
+ */
+export function enterIsTTY(isTTY: boolean, name: 'stdout' | 'stderr') {
+	optionStorage.enterWith([{ isTTY: { [name]: isTTY } }, ...getOptions()]);
+}
+
