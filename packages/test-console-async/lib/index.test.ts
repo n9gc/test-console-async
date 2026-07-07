@@ -1,5 +1,5 @@
 import { test } from 'tape';
-import { inspect } from './index.ts';
+import { ignore, inspect, restore } from './index.ts';
 
 const isTTY = [
 	process.stdout.isTTY,
@@ -118,5 +118,67 @@ test('assign isTTY', async t => {
 	}, 50));
 
 	t.same(stream[0].isTTY, isTTY[0], 'isTTY');
+});
+
+test('interceptor order', t => {
+	const l: string[] = [];
+	inspect(() => {
+		inspect(() => {
+			console.log('jjq');
+			console.log('ok 666 good');
+			console.log('abc');
+		}, {
+			stdout(data, write) {
+				l.push(`${data}_2`);
+				if (data !== 'abc\n') write(data);
+			},
+		});
+	}, {
+		stdout(data, write) {
+			l.push(`${data}_1`);
+			if (data !== 'jjq\n') write(data);
+		},
+		isTTY: false,
+	});
+	t.deepEqual(l, [
+		'jjq\n_2',
+		'jjq\n_1',
+		'ok 666 good\n_2',
+		'ok 666 good\n_1',
+		'abc\n_2',
+	]);
+	t.end();
+});
+
+test('ignore', t => {
+	ignore(() => {
+		console.log('error 999 not ok!');
+	});
+	t.end();
+});
+
+test('restore', async t => {
+	const { stdout } = await restore(async () => {
+		console.log('888');
+		console.log(999);
+	});
+	t.same(stdout, [
+		'888\n',
+		'999\n',
+	]);
+	const hh: string[] = [];
+	const { stderr } = await restore(async () => {
+		console.log(555);
+		console.log(432);
+		console.error(667);
+	}, {
+		stdout(data) {
+			hh.push(data.toString());
+		},
+		stderr: () => void 0,
+	});
+	t.same(hh, ['555\n', '432\n']);
+	t.same(stderr, ['667\n']);
+	t.end();
 });
 
