@@ -23,11 +23,13 @@ function hijack() {
 	for (const name of ['stdout', 'stderr'] as const) {
 		const isTTYOriginal = process[name].isTTY;
 		Object.defineProperty(process[name], 'isTTY', {
-			get: (): boolean => getOptions()
+			get: (): boolean | undefined => (getOptions()
+				.filter(option => 'isTTY' in option)
 				.map(option => option.isTTY)
-				.map(n => (typeof n === 'object' ? n[name] : n))
-				.find(n => n !== void 0)
-				?? isTTYOriginal,
+				.map(n => (typeof n === 'object' ? n : { [name]: n }))
+				.find(n => name in n)
+				?? { [name]: isTTYOriginal }
+			)[name],
 		});
 		const writeOriginal = process[name].write.bind(process[name]);
 		process[name].write = (
