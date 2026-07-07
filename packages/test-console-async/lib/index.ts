@@ -76,6 +76,22 @@ export function inspect<T>(
 	return addOptions([inspectOption], operation);
 }
 
+/**Option to ignore all output */
+const ignoreOption: InspectOption = {
+	isTTY: false,
+	stderr: () => void 0,
+	stdout: () => void 0,
+};
+
+/**
+ * Suppresse a function, make it quiet
+ * @param operation the operation to be suppressed, sync or async
+ * @returns the result of the `operation`
+ */
+export function ignore<T>(operation: () => T) {
+	return inspect(operation, ignoreOption);
+}
+
 /**The return value of {@link restore}*/
 export interface Restored<T> {
 	/**The result of the operation */
@@ -88,40 +104,30 @@ export interface Restored<T> {
 /**
  * Inspect stdout/stderr and restore the output for an async `operation`
  * @param operation the operation you want to run
- * @param [inspectOption={}] the option for the inspection
+ * @param [inspectOption={}] the option for the inspection,
+ * or `false` if you want to suppresse the output of the `operation`
  * @returns the result of the `operation` and outputs resotred
  */
 export async function restore<T>(
 	operation: () => Promise<T>,
-	inspectOption: InspectOption = {},
+	inspectOption: InspectOption | false = false,
 ): Promise<Restored<T>> {
 	hijack();
 	const stderr: (string | Uint8Array)[] = [];
 	const stdout: (string | Uint8Array)[] = [];
-	const result = await addOptions([{
-		stderr(data, write) {
-			stderr.push(data);
-			write(data);
+	const result = await addOptions([
+		{
+			stderr(data, write) {
+				stderr.push(data);
+				write(data);
+			},
+			stdout(data, write) {
+				stdout.push(data);
+				write(data);
+			},
 		},
-		stdout(data, write) {
-			stdout.push(data);
-			write(data);
-		},
-	}, inspectOption], operation);
+		inspectOption || ignoreOption,
+	], operation);
 	return { stderr, stdout, result };
 }
-
-/**
- * Suppresse a function, make it quiet
- * @param operation the operation to be suppressed, sync or async
- * @returns the result of the `operation`
- */
-export function ignore<T>(operation: () => T) {
-	return inspect(operation, {
-		isTTY: false,
-		stderr: () => void 0,
-		stdout: () => void 0,
-	});
-}
-
 
